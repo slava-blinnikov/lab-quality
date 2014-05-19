@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE eDocument>
+<root>
+    <database port="5432" host="172.16.3.44" reconnecting_trys="0" reconnecting_interval="15000" name="eWarehouse"/>
+    <logon password="cunt" store_session="false" last_user="developer" group="" user="developer" type="auto">
+        <user name="developer"/>
+        <user name="user"/>
+    </logon>
+    <queries>
+		<query type="get_user_role">
+			<![CDATA[
+				select role from quality.users where username = :name
+			]]>
+		</query>
+        <query type="get_role_properies">
+			<![CDATA[
+				select	name,
+						shops,
+						feature_bricks_values,
+						feature_values,
+						summary,
+						batches,
+						control_charts
+				from quality.roles
+				where role = :role
+			]]>
+		</query>
+		
+		<query type="get_states">
+			<![CDATA[
+				select state, name, color from quality.states order by state
+			]]>
+		</query>	
+		<query type="get_batch">
+			<![CDATA[
+				select batch, shop, datetime, number, substance, state, note
+				from quality.batches
+				where batch = :batch
+			]]>
+		</query>
+		<query type="get_batches_details">
+			<![CDATA[
+				select batch, line, from_dt, to_dt
+				from quality.batches_details
+				where from_dt >= :begin
+				and from_dt <= :end
+				order by from_dt
+			]]>
+		</query>
+		<query type="get_shops">
+			<![CDATA[
+				select distinct shop, msh.name
+				from meta.shops msh
+				join quality.lines using(shop)
+				order by msh.name
+			]]>
+		</query>
+		<query type="get_lines">
+			<![CDATA[
+				select line, shop, ql.name, number
+				from quality.lines ql
+				join meta.shops msh using(shop)
+				order by msh.name, ql.name 
+			]]>
+		</query>
+		<query type="get_substances">
+			<![CDATA[
+				select substance, shop, coalesce(alter_name, name) as nname
+				from quality.substances
+				join meta.substances using (substance)
+				order by nname
+			]]>
+		</query>
+		<query type="update_batches_details_line">
+			<![CDATA[
+				update quality.batches_details
+				set line = :new_line
+				where batch = :batch
+				and line = :line
+				and date_trunc('second', from_dt) = :from_dt
+			]]>
+		</query>
+		<query type="update_batches_details_period">
+			<![CDATA[
+				update quality.batches_details
+				set from_dt = :new_from_dt, to_dt = :new_to_dt
+				where batch = :batch
+				and line = :line
+				and date_trunc('second', from_dt) = :from_dt
+			]]>
+		</query>
+		<query type="get_feature_name">
+			<![CDATA[
+				select name from quality.features where feature = :feature
+			]]>
+		</query>
+		<query type="get_feature_values">
+			<![CDATA[
+				select	shop,
+						line,
+						datetime,
+						batch,
+						"number",
+						substance,
+						bricks_values,
+						bricks_states,
+						"values",
+						states
+				from quality.get_feature_values(:dt_from, :dt_to, :role)
+			]]>
+		</query>
+    </queries>
+</root>
