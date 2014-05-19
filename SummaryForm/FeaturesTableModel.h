@@ -10,6 +10,9 @@ class FeaturesTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
+	/*!
+	 * \brief The FeatureHeader struct
+	 */
 	struct FeatureHeader
 	{
 		FeaturteType type;
